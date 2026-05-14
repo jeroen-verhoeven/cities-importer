@@ -12,9 +12,10 @@ if (!defined('ABSPATH')) exit; // Security check
  * @param string $capital Name of the capital city.
  * @param string|null $population Population, formatted or null.
  * @param string|null $currency Currency name, or null.
+ * @param string|null $country_name Country name, or null.
  * @return string|false Generated summary, or false if generation failed.
  */
-function generate_city_summary(string $capital, ?string $population = null, ?string $currency = null) {
+function generate_city_summary(string $capital, ?string $population = null, ?string $currency = null, string $country_name) {
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : null;
 
     if (!$api_key) {
@@ -28,7 +29,7 @@ function generate_city_summary(string $capital, ?string $population = null, ?str
     // Remove HTML/special characters
     $capital = wp_strip_all_tags($capital);
 
-    $prompt = "Write a short 2-3 sentence summary about the city {$capital}.";
+    $prompt = "Write a short 2-3 sentence summary about the city {$capital} in {$country_name}, Europe.";
     $prompt .= " Keep it concise, informative, and friendly.";
 
     WP_CLI::log("Prompt for {$capital}: {$prompt}");
@@ -115,6 +116,7 @@ function generate_summaries_for_cities(bool $force = false) {
     $counter = 1;
 
     foreach ($query->posts as $post_id) {
+        $country_name = get_field('country', $post_id);
         $capital = get_the_title($post_id);
         $population = get_field('population', $post_id) ?? null;
         $currency = get_field('currency', $post_id) ?? null;
@@ -126,7 +128,7 @@ function generate_summaries_for_cities(bool $force = false) {
             continue;
         }
 
-        $summary = generate_city_summary($capital, $population, $currency);
+        $summary = generate_city_summary($capital, $population, $currency, $country_name);
 
         if ($summary) {
             update_field('summary', $summary, $post_id);

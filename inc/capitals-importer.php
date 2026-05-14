@@ -138,6 +138,7 @@ function import_european_capitals() {
             continue;
         }
 
+        $country_name = $country['name']['common'] ?? '';
         $lat = $country['capitalInfo']['latlng'][0] ?? null;
         $lng = $country['capitalInfo']['latlng'][1] ?? null;
         $population = format_population($country['population'] ?? null);
@@ -157,6 +158,7 @@ function import_european_capitals() {
             continue;
         }
 
+        update_field('country', $country_name, $post_id);
         update_field('latitude', $lat, $post_id);
         update_field('longitude', $lng, $post_id);
         update_field('population', $population, $post_id);
